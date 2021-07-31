@@ -12,6 +12,7 @@
     <script src="./src/entities/character.js"></script>
     <script src="./src/entities/enemy.js"></script>
     <script src="./src/factories/make-character.js"></script>
+    <script src="./src/factories/make-enemy.js"></script>
 </head>
 <body>
     <canvas id="canvas" width="800" height="400"></canvas>
@@ -40,8 +41,16 @@
 
         (async () => {            
             const game = new Game(canvas, cache);
+            const enemy = await makeEnemy(game);
+            enemy.side = 'right';
+            enemy.x = 600;
+
             const character = await makeCharacter(game);
-            await character.attack();
+            character.side = 'left';
+
+            setTimeout(async () => {
+                await character.attack();
+            }, 1000);
         })();
     </script>
 </body>

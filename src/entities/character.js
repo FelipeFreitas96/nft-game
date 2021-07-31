@@ -1,24 +1,79 @@
-class Object {
+class GameObject {
     constructor() {
         this.x = 0;
         this.y = 0;
-        this.side = 'left';
+        this.rotation = 0;
         this.parent = null;
     }
+    
+    animateCompose(animations) {
+        animations.forEach(animation => {
+            setTimeout(() => {
+                this.animate(animation.animation, animation.duration);
+            }, animation.delay);
+        });
+    }
+
+    animate(params, duration) {       
+        let startTime;
+        let startParam = {
+            rotation: this.rotation,
+            x: this.x,
+            y: this.y,
+        }
+
+        const step = () => {
+            if (!startTime) {
+                startTime = Date.now();
+            }
+
+            const elapsed = Date.now() - startTime;
+            const percent = elapsed / duration;
+
+            if (percent < 1.0) {
+                requestAnimationFrame(step);
+            }
+
+            Object.keys(params).forEach((key) => {
+                this[key] = startParam[key] + (params[key] - startParam[key]) * Math.min(percent, 1);
+            });
+        }
+
+        step();
+    }
+
     draw() {
         if (this.image) {
-            if (this.parent) {
-                this.game.context.drawImage(this.image, this.parent.x + this.x, this.parent.y + this.y, this.image.width, this.image.height);
-            } else {
-                this.game.context.drawImage(this.image, this.x, this.y, this.image.width, this.image.height);
-            }
+            const parentX = this.parent?.x || 0;
+            const parentY = this.parent?.y || 0;
+            const imageWidth = this.image.width / 2;
+            const imageHeight = this.image.height / 2;
+            const x = this.x + parentX;
+            const y = this.y + parentY;
+            const rotation = this.parent?.rotation || this.rotation;
+
+            this.game.context.save();
+            this.game.context.translate(x + imageWidth, y + imageHeight);
+            this.game.context.rotate(rotation * Math.PI / 180);
+            this.game.context.translate(-imageWidth, -imageHeight);
+            this.game.context.drawImage(this.image, 0, 0);
+            this.game.context.restore();
         }
     }
 }
 
 class Cache {
-    constructor() {
+    constructor(images) {
         this.cache = {};
+        this.cacheImages(images);
+    }
+
+    async cacheImages(images) {
+        for (const key in images) {
+            for (const url of images[key]) {
+                await this.add(url);
+            }
+        }
     }
 
     async createImage(path, callback) {
@@ -93,22 +148,22 @@ class Cache {
 }
 
 class Game {
-    constructor(canvas, cache) {
+    constructor(canvas, cache, FPS = 60) {
         this.cache = cache;
         this.canvas = canvas;
         this.context = canvas.getContext('2d');
         this.objects = [];
-        setInterval(() => this.loopEvent(), 1000);
+        setInterval(() => this.loopEvent(), 1000 / FPS);
     }
     async createImageFromCache(path, colors) {
         return await this.cache.add(path, colors);
     }
     createObject() {
-        const object = new Object();
-        object.game = this;
+        const gameObject = new GameObject();
+        gameObject.game = this;
 
-        this.objects.push(object);
-        return object;
+        this.objects.push(gameObject);
+        return gameObject;
     }
     createCharacter() {
         const character = new Character();
@@ -125,10 +180,22 @@ class Game {
     }
 }
 
-class Character extends Object {
+class Character extends GameObject {
     constructor() {
         super();
         this.parts = {};
+    }
+    async attack() {
+        const animations = [{
+            animation: { rotation: 45, x: 500 },
+            duration: 250,
+            delay: 0,
+        }, {
+            animation: { rotation: 0, x: 0 },
+            duration: 250,
+            delay: 250,
+        }];
+        this.animateCompose(animations);
     }
     async setParts(parts) {
         if (parts.body) {

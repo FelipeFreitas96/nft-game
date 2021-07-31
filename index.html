@@ -5,7 +5,13 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <script src="./src/entities/cache.js"></script>
+    <script src="./src/entities/game.js"></script>
+    <script src="./src/entities/game-object.js"></script>
+    <script src="./src/entities/creature.js"></script>
     <script src="./src/entities/character.js"></script>
+    <script src="./src/entities/enemy.js"></script>
+    <script src="./src/factories/make-character.js"></script>
 </head>
 <body>
     <canvas id="canvas" width="800" height="400"></canvas>
@@ -34,32 +40,8 @@
 
         (async () => {            
             const game = new Game(canvas, cache);
-            const nftCharacter = game.createCharacter();
-            const parts = {
-                body: {
-                    src: 'https://i.imgur.com/LNQjoM9.png',
-                    color: { r: 250, g: 0, b: 0},
-                },
-                eyes: {
-                    src: 'https://i.imgur.com/PzXmp0J.png',
-                    color: { r: 0, g: 250, b: 0},
-                },
-                weapon: {
-                    src: 'https://i.imgur.com/B5C1bAx.png',
-                    color: { r: 100, g: 0, b: 100},
-                },
-                mouth: {
-                    src: 'https://i.imgur.com/8OfScDO.png',
-                    color: { r: 0, g: 100, b: 0},
-                },
-                hat: {
-                    src: 'https://i.imgur.com/uZrYVhI.png',
-                    color: { r: 100, g: 100, b: 0},
-                },
-            }
-
-            await nftCharacter.setParts(parts);
-            await nftCharacter.attack();
+            const character = await makeCharacter(game);
+            await character.attack();
         })();
     </script>
 </body>

@@ -54,7 +54,7 @@ class Cache {
         });
     }
 
-    async add(path, colors = { r: 0, g: 0, b: 0 }) {
+    async add(path, colors = { r: 255, g: 255, b: 255 }) {
         if (!this.cache[path]) {
             this.cache[path] = await this.createImage(path, async (image) => image);
         }

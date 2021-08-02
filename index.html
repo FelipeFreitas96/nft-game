@@ -5,14 +5,24 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <script src="./src/entities/animation-handler.js"></script>
     <script src="./src/entities/cache.js"></script>
-    <script src="./src/entities/game.js"></script>
     <script src="./src/entities/game-object.js"></script>
+    <script src="./src/entities/card.js"></script>
+    <script src="./src/entities/game.js"></script>
     <script src="./src/entities/creature.js"></script>
     <script src="./src/entities/character.js"></script>
     <script src="./src/entities/enemy.js"></script>
     <script src="./src/factories/make-character.js"></script>
     <script src="./src/factories/make-enemy.js"></script>
+    <script src="./src/factories/make-hand.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+    </style>
 </head>
 <body>
     <canvas id="canvas" width="800" height="400"></canvas>
@@ -39,17 +49,29 @@
             ],
         });
 
-        (async () => {            
-            const game = new Game(canvas, cache);
-            const enemy = await makeEnemy(game);
+        (async () => {       
+            // set canvas width and height same as the window
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const animationHandler = new AnimationHandler();
+            const game = new Game(canvas, cache, animationHandler);
+            const enemy = await make_enemy(game);
             enemy.side = 'right';
-            enemy.x = 600;
+            enemy.x = (canvas.width * 0.8) - enemy.width;
+            enemy.y = (canvas.height / 2) - (enemy.height / 2);
 
-            const character = await makeCharacter(game);
+            const character = await make_character(game);
             character.side = 'left';
+            character.x = canvas.width * 0.2;
+            character.y = (canvas.height / 2) - (character.height / 2);
 
+            // Before Loading, draw the game objects
+            game.animationHandler.emit('draw');
+    
             setTimeout(async () => {
-                await character.attack();
+                await character.basic_attack({ toPos: enemy.x - enemy.width * 0.8 });
+                await enemy.basic_attack_hitted();
             }, 1000);
         })();
     </script>

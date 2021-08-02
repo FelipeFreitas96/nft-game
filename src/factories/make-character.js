@@ -1,4 +1,4 @@
-const makeCharacter = async (game) => {
+const make_character = async (game) => {
     const character = game.createCharacter();
     const parts = {
         body: {
@@ -22,6 +22,6 @@ const makeCharacter = async (game) => {
             color: { r: 100, g: 100, b: 0},
         },
     }
-    await character.setParts(parts);
+    await character.set_parts(parts);
     return character;
 }

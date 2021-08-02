@@ -3,27 +3,44 @@ class Creature extends GameObject {
         super();
         this.parts = {};
     }
-    async setParts(parts) {
-        if (parts.body) {
-            this.parts.body = this.game.createObject();
-            this.parts.body.image = await this.game.createImageFromCache(parts.body.src, parts.body.color);
-            this.parts.body.parent = this;
-        } if (parts.eyes) {
-            this.parts.eyes = this.game.createObject();
-            this.parts.eyes.image = await this.game.createImageFromCache(parts.eyes.src, parts.eyes.color);
-            this.parts.eyes.parent = this;
-        } if (parts.weapon) {
-            this.parts.weapon = this.game.createObject();
-            this.parts.weapon.image = await this.game.createImageFromCache(parts.weapon.src, parts.weapon.color);
-            this.parts.weapon.parent = this;
-        } if (parts.mouth) {
-            this.parts.mouth = this.game.createObject();
-            this.parts.mouth.image = await this.game.createImageFromCache(parts.mouth.src, parts.mouth.color);
-            this.parts.mouth.parent = this;
-        } if (parts.hat) {
-            this.parts.hat = this.game.createObject();
-            this.parts.hat.image = await this.game.createImageFromCache(parts.hat.src, parts.hat.color);
-            this.parts.hat.parent = this;
+    async basic_attack_hitted() {
+        const animations = [{
+            animation: { y: this.y-40, opacity: this.opacity / 2 },
+            duration: 100,
+            delay: 225,
+            opacity: 0.5,
+        }, {
+            animation: { y: this.y, opacity: this.opacity },
+            duration: 100,
+            delay: 375,
+        }];
+        this.animateCompose(animations);
+    }
+    async basic_attack({ toPos }) {
+        const animations = [{
+            animation: { rotation: 45, x: toPos },
+            duration: 250,
+            delay: 0,
+        }, {
+            animation: { rotation: 0, x: this.x },
+            duration: 250,
+            delay: 250,
+        }];
+        this.animateCompose(animations);
+    }
+    async set_parts(parts) {
+        for (const partName of Object.keys(parts)) {
+            this.parts[partName] = this.game.createObject();
+            this.parts[partName].image = await this.game.createImageFromCache(parts[partName].src, parts[partName].color);
+            this.parts[partName].width = this.parts[partName].image.width;
+            this.parts[partName].height = this.parts[partName].image.height;
+
+            if (partName === 'body') {
+                this.width = this.parts[partName].width;
+                this.height = this.parts[partName].height;
+            }
+            
+            this.parts[partName].parent = this;
         }
     }
 }
